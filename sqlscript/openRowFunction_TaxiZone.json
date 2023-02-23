@@ -1,13 +1,16 @@
 {
-	"name": "SQL script 1",
+	"name": "openRowFunction_TaxiZone",
 	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
 		"content": {
-			"query": "",
+			"query": "select \n   top 100 *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )as [result]",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "sudheer",
+				"databaseName": "master",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
