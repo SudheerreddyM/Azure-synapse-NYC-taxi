@@ -1,0 +1,20 @@
+{
+	"name": "dataType",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "-- use storedProcedure\nexec sp_describe_first_result_set N'select\n   top 100 *\nfrom\n    openrowset(\n        bulk ''https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv'',\n        format=''csv'',\n        HEADER_ROW=TRUE,\n        PARSER_VERSION=''2.0''\n    )as [result]'\n\n-- use max length of columns\nselect \n     max(len(locationId))as len_locationid,\n     max(len(Borough))as Borough,\n     max(len(Zone))as Zone,\n     max(len(service_zone))as service_zone\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )as [result]\n\n\n--use with clause to provide explicit data types\n\nselect \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]\n\nexec sp_describe_first_result_set N'select\n*\nfrom\n    openrowset(\n        bulk ''https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv'',\n        format=''csv'',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR='','',\n        ROWTERMINATOR=''\\n'',\n        PARSER_VERSION=''2.0''\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]'",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
