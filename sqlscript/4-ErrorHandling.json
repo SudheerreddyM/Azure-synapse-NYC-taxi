@@ -1,0 +1,20 @@
+{
+	"name": "4-ErrorHandling",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "-- error handling change version 2.0 to 1.0\nselect \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        firstrow=2,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='1.0'\n    )\n    with(\n        locationID smallint 1,\n        borough varchar(15) 2,\n        zone varchar(50) 3,\n        service_zone varchar(15) 4\n    )\n    as [result]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
