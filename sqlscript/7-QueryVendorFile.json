@@ -1,0 +1,20 @@
+{
+	"name": "7-QueryVendorFile",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "select\n     * \nfrom    \n    openrowset(\n                BULK 'vendor.csv',\n                data_source='nyc_taxi_data_raw',\n                format='csv',\n                header_row=TRUE,\n                parser_version='2.0'\n            )as vendor\n        ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
