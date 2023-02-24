@@ -94,7 +94,30 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/dataType')]",
+			"name": "[concat(parameters('workspaceName'), '/1-openRowFunction_TaxiZone')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "select \n   top 100 *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )as [result]",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2-dataType')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -117,7 +140,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/openRowFunction_TaxiZone')]",
+			"name": "[concat(parameters('workspaceName'), '/3-SubsetColumns')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -125,7 +148,30 @@
 					"name": "nyc_taxi/discovery"
 				},
 				"content": {
-					"query": "select \n   top 100 *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )as [result]",
+					"query": "-- read without header files add headers according\nselect \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone_without_header.csv',\n        format='csv',\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]\n\n    -- specify columns in order wise\nselect \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone_without_header.csv',\n        format='csv',\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        Zone varchar(50) 3,\n        Borough varchar(15) 2\n        \n    )\n    as [result]\n\n    -- Fix column names in header file\nselect * from\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        header_row=True,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        locationID smallint 1,\n        borough varchar(15) 2,\n        zone varchar(50) 3,\n        service_zone varchar(15) 4\n    )\n    as [result]",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4-ErrorHandling')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "-- error handling change version 2.0 to 1.0\nselect \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        firstrow=2,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='1.0'\n    )\n    with(\n        locationID smallint 1,\n        borough varchar(15) 2,\n        zone varchar(50) 3,\n        service_zone varchar(15) 4\n    )\n    as [result]",
 					"metadata": {
 						"language": "sql"
 					},
