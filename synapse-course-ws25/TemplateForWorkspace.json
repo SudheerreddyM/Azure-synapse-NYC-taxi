@@ -184,6 +184,98 @@
 				"type": "SqlQuery"
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/5-UseDataExternalSource')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "select \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]\n\n    -- create external data source\n    create external data source nyc_taxi_data\n    with\n         (\n             location='abfss://my-taxi-data@synapsecourseadls25.dfs.core.windows.net/'\n         )\n-- retreving \n\nselect \n     *\nfrom\n    openrowset(\n        bulk 'raw/taxi_zone.csv',\n        data_source='nyc_taxi_data',\n        format='csv',\n        HEADER_row=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/6-CreatingRawExternalDataSource')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "-- creating raw external data source\n\ncreate external data source nyc_taxi_data_raw\n    with\n         (\n             location='abfss://my-taxi-data@synapsecourseadls25.dfs.core.windows.net/raw'\n         )\n\nselect name,location from sys.external_data_sources\n\ndrop external data source nyc_taxi_data_raw\n\nselect \n     * \nfrom    \n    openrowset(\n                BULK 'calendar.csv',\n                data_source='nyc_taxi_data_raw',\n                format='csv',\n                header_row=TRUE,\n                parser_version='2.0'\n            )as cal\n        ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/7-QueryVendorFile')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "select\n     * \nfrom    \n    openrowset(\n                BULK 'vendor.csv',\n                data_source='nyc_taxi_data_raw',\n                format='csv',\n                header_row=TRUE,\n                parser_version='2.0'\n            )as vendor\n        ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/8-AssignmentTripTypeTsvFile')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "use nyc_taxi_discovery\nselect * from\nopenrowset(\n    bulk'trip_type.tsv',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    fieldterminator='\\t',\n    header_row=true,\n    parser_version='2.0'\n)as trip_type",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
 		}
 	]
 }
