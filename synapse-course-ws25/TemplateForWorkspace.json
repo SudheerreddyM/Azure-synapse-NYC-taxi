@@ -117,6 +117,52 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/10-JsonFile_rate_code')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "select rate_code_id,rate_code\nfrom \nopenrowset(\n    bulk 'rate_code.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    fieldterminator='0x0b',\n    fieldquote='0x0b',\n    rowterminator='0x0b'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as rate_code\ncross apply openjson(jsonDoc)\nwith(\n    rate_code_id smallint,\n    rate_code varchar(20) \n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/11-Jsonfile_multi_line_rate_code')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "select rate_code_id,rate_code\nfrom \nopenrowset(\n    bulk 'rate_code_multi_line.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    fieldterminator='0x0b',\n    fieldquote='0x0b',\n    rowterminator='0x0b'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as rate_code\ncross apply openjson(jsonDoc)\nwith(\n    rate_code_id smallint,\n    rate_code varchar(20) \n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/2-dataType')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -264,6 +310,29 @@
 				},
 				"content": {
 					"query": "use nyc_taxi_discovery\nselect * from\nopenrowset(\n    bulk'trip_type.tsv',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    fieldterminator='\\t',\n    header_row=true,\n    parser_version='2.0'\n)as trip_type",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/9-JsonFile_payment_type')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "use nyc_taxi_discovery\n\nselect json_value(jsonDoc,'$.payment_type')payment_type,\n       json_value(jsonDoc,'$.payment_type_desc')payment_type_desc\nfrom openrowset(\n    bulk 'payment_type.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    parser_version='1.0',\n    fieldterminator='0x0b',\n    fieldquote='0x0b',\n    rowterminator='0x0a'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as payment_type;\n\n-- openJson Function\nselect * from \nopenrowset(\n    bulk 'payment_type.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    fieldterminator='0x0b',\n    fieldquote='0x0b'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as payment_type\ncross apply openjson(jsonDoc)\nwith(\n    payment_type smallint,\n    description varchar(20) '$.payment_type_desc' /* renaming column */\n)\n\n-- array type json file\nselect cast(json_value(jsonDoc,'$.payment_type')as smallint)payment_type,\n       cast(json_value(jsonDoc,'$.payment_type_desc[0].value')as varchar(15))payment_type_desc_0,\n       cast(json_value(jsonDoc,'$.payment_type_desc[1].value')as varchar(15))payment_type_desc_1\nfrom \nopenrowset(\n    bulk 'payment_type_array.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    parser_version='1.0',\n    fieldterminator='0x0b',\n    fieldquote='0x0b',\n    rowterminator='0x0a'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as payment_type\n\n-- openjson function in array type josn file\n\nselect payment_type,payment_type_desc_value\nfrom \nopenrowset(\n    bulk 'payment_type_array.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    parser_version='1.0',\n    fieldterminator='0x0b',\n    fieldquote='0x0b',\n    rowterminator='0x0a'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as payment_type\ncross apply openjson(jsonDoc)\nwith(\n    payment_type smallint,\n    payment_type_desc nvarchar(max) as json\n) as payment_type\ncross apply openjson(payment_type_desc)\nwith(\n    sub_type smallint,\n    payment_type_desc_value varchar(20) '$.VALUE'\n)\n",
 					"metadata": {
 						"language": "sql"
 					},
