@@ -1,0 +1,20 @@
+{
+	"name": "11-Jsonfile_multi_line_rate_code",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "select rate_code_id,rate_code\nfrom \nopenrowset(\n    bulk 'rate_code_multi_line.json',\n    data_source='nyc_taxi_data_raw',\n    format='csv',\n    fieldterminator='0x0b',\n    fieldquote='0x0b',\n    rowterminator='0x0b'\n)\nwith(\n    jsonDoc nvarchar(max)\n)as rate_code\ncross apply openjson(jsonDoc)\nwith(\n    rate_code_id smallint,\n    rate_code varchar(20) \n)",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
