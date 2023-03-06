@@ -1,0 +1,20 @@
+{
+	"name": "16-check_for_duplicates",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "use nyc_taxi_discovery\nselect \n     *\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]\n\n-- finding duplicates LocationId\nselect \n     LocationId,\n     count(1) as no_of_records\nfrom\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0'\n    )\n    with(\n        LocationID smallint,\n        Borough varchar(15),\n        Zone varchar(50),\n        service_zone varchar(15)\n    )\n    as [result]\ngroup by LocationId\nhaving count(1)>1\norder by LocationId",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

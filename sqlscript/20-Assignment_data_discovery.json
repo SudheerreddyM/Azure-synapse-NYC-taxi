@@ -1,0 +1,20 @@
+{
+	"name": "20-Assignment_data_discovery",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "select taxi_zone.borough,count(1) as total_trips,\nsum(case when trip_data.payment_type=1 then 1 else 0 end)as card_trips,\nsum(case when trip_data.payment_type=2 then 1 else 0 end)as cash_trips,\ncast((sum(case when trip_data.payment_type=1 then 1 else 0 end)/cast(count(1) as decimal)) *100 as decimal(5,2)) as card_trips_percentage,\ncast((sum(case when trip_data.payment_type=2 then 1 else 0 end)/cast(count(1) as decimal)) *100 as decimal(5,2)) as cash_trips_percentage\nfrom OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/**',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) as trip_data\n    join\n    openrowset(\n        bulk 'https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data/raw/taxi_zone.csv',\n        format='csv',\n        HEADER_ROW=TRUE,\n        FIELDTERMINATOR=',',\n        ROWTERMINATOR='\\n',\n        PARSER_VERSION='2.0',\n        firstrow=2\n    )\n    with(\n        LocationID smallint 1,\n        Borough varchar(15) 2,\n        Zone varchar(50) 3,\n        service_zone varchar(15) 4\n    )\n    AS taxi_zone\n    on trip_data.PULocationId=taxi_zone.LocationId\nwhere trip_data.payment_type in ('1','2')\ngroup by taxi_zone.borough\norder by total_trips",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

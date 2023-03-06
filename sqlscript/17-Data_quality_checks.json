@@ -1,0 +1,20 @@
+{
+	"name": "17-Data_quality_checks",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "-- Identify any data quality issues in trip total amount\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\n\n\nSELECT\n    min(total_amount) as min_total_amount,\n    max(total_amount) as max_total_amount,\n    avg(total_amount) as avg_total_amount,\n    count(1)as total_no_of_records,\n    count(total_amount) as not_null_total_no_of_records\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\nwhere total_amount<0\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
