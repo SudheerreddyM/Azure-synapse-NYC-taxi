@@ -1,0 +1,20 @@
+{
+	"name": "15-Query_Delta_files",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/discovery"
+		},
+		"content": {
+			"query": "SELECT\ntop 100 *\nfrom\nopenrowset(\n    bulk 'trip_data_green_delta/', -- we can't query without delta_log folder\n    format='delta',\n    data_source='nyc_taxi_data_raw'\n)as [result]\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
