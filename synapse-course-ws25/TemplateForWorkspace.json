@@ -186,6 +186,75 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/13-ParquetFile_reading')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "-- This is auto-generated code\nuse nyc_taxi_discovery\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=2020/month=01/',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/14-Assignment_in_Parquet_files')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "-- query from folders using filename function\nSELECT\n    result.filename() as filename,\n    *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\n\n--using filepath function\nSELECT\n    result.filename() as filename,\n    result.filepath() as filepath,\n    *\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\n\n-- using filepath function\nSELECT\n    result.filename() as filename,\n    result.filepath(1) as month,\n    result.filepath(2) as year,\ncount(1) as record_count\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/year=*/month=*/*',\n        FORMAT = 'PARQUET',\n        data_source='nyc_taxi_data_raw'\n    ) AS [result]\nwhere result.filepath(1)='2021' and result.filepath(2) in ('02','03')\ngroup by result.filename(),result.filepath(1),result.filepath(2)\norder by result.filename(),result.filepath(1),result.filepath(2)\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/15-Query_Delta_files')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "nyc_taxi/discovery"
+				},
+				"content": {
+					"query": "SELECT\ntop 100 *\nfrom\nopenrowset(\n    bulk 'trip_data_green_delta/', -- we can't query without delta_log folder\n    format='delta',\n    data_source='nyc_taxi_data_raw'\n)as [result]\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "nyc_taxi_discovery",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/2-dataType')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
