@@ -1,0 +1,20 @@
+{
+	"name": "2_CreateExternalDataSources",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/Data Virtualisation"
+		},
+		"content": {
+			"query": "use nyc_taxi_dw\n\ncreate external data source nyc_taxi_src\nwith(\n    location='https://synapsecourseadls25.dfs.core.windows.net/my-taxi-data'\n);",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_dw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

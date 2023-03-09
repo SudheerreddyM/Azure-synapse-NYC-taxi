@@ -1,0 +1,20 @@
+{
+	"name": "1_CreateDatabases",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/Data Virtualisation"
+		},
+		"content": {
+			"query": "use nyc_taxi_dw\nGO\n\nalter database nyc_taxi_dw collate Latin1_General_100_BIN2_UTF8\nGO\n\ncreate schema bronze\nGO\n\ncreate schema silver\nGO\n\ncreate schema gold\nGO\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_dw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

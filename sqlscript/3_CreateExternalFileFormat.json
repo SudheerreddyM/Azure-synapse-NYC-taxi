@@ -1,0 +1,20 @@
+{
+	"name": "3_CreateExternalFileFormat",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/Data Virtualisation"
+		},
+		"content": {
+			"query": "use nyc_taxi_dw\n\ncreate external file format nyc_taxi_file_format\nwith(\n    format_type=delimitedtext,\n    format_options(\n        field_terminator=',',\n        string_delimiter='\"',\n        first_row=2,\n        use_type_default=False,\n        encoding='UTF8'\n    )\n);",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_dw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

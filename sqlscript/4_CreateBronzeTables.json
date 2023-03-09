@@ -1,0 +1,20 @@
+{
+	"name": "4_CreateBronzeTables",
+	"properties": {
+		"folder": {
+			"name": "nyc_taxi/Data Virtualisation"
+		},
+		"content": {
+			"query": "use nyc_taxi_dw\n\ncreate external table bronze.taxi_zone\n(\n    location_id smallint,\n    borough varchar(15),\n    zone varchar(50),\n    service_zone varchar(15)\n)\nwith(\n    location='raw/taxi_zone.csv',\n    data_source=nyc_taxi_src,\n    file_format=nyc_taxi_file_format\n\n);\n\nselect * from bronze.taxi_zone",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_dw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
